@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виникнення держави і права</title>
+    <!-- Іконка античного храму -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🏛️</text></svg>">
+    <style>
+        /* Базові стилі */
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --success-bg: #d5f5e3;
+            --danger-bg: #fadbd8;
+            --bg-color: #f9f9f9;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; background-color: var(--bg-color); }
+        
+        /* Хедер та Навігація */
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        header h1 { margin: 0; font-size: 1.1rem; font-weight: normal; opacity: 0.9; }
+        header h2 { margin: 5px 0 0; font-size: 1.6rem; }
+        
+        #reset-btn { position: absolute; top: 15px; right: 20px; background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        #reset-btn:hover { background: #c0392b; transform: translateY(-2px); }
+
+        nav { background: #fff; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; z-index: 99; }
+        nav button { padding: 10px 15px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s; }
+        nav button.active, nav button:hover { background: var(--accent); color: white; }
+        .bottom-nav { margin-top: auto; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); }
+
+        /* Загальні контейнери */
+        main { flex-grow: 1; padding: 20px; max-width: 1100px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .block-page { display: none; animation: fadeIn 0.4s; }
+        .block-page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .task-container { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        h3 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 8px; margin-top: 0; font-size: 1.3rem; }
+        
+        /* Інструкції */
+        .instruction { color: #555; margin-top: 5px; margin-bottom: 20px; font-style: italic; font-size: 0.9rem; }
+        
+        .check-btn { display: block; margin: 20px auto 0; padding: 10px 25px; background: var(--primary); color: white; font-size: 1.1rem; border: none; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .check-btn:hover { background: var(--accent); }
+
+        /* Drag & Drop */
+        .draggable { padding: 10px 15px; background: #fff; border: 2px solid var(--accent); border-radius: 5px; cursor: grab; display: inline-flex; justify-content: center; align-items: center; margin: 5px; user-select: none; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; z-index: 50; position: relative; }
+        .draggable:active { cursor: grabbing; transform: scale(0.95); }
+        .dropzone { min-height: 60px; border: 2px dashed #bdc3c7; border-radius: 5px; padding: 10px; display: flex; gap: 10px; align-items: center; justify-content: center; background: #fdfdfd; flex-wrap: wrap; transition: 0.3s; }
+        .dropzone.dragover { background: #e8f4fd; border-color: var(--accent); }
+        .correct-element { border-color: var(--success) !important; background-color: var(--success-bg) !important; color: #1e8449; cursor: default !important; }
+        .incorrect-element { border-color: var(--danger) !important; background-color: var(--danger-bg) !important; color: #943126; }
+
+        /* Блок 1.1: Стрічка часу */
+        #timeline-1 { display: flex; gap: 5px; align-items: center; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+        .timeline-slot { flex: 1; min-width: 140px; }
+        .arrow { font-size: 24px; color: var(--primary); font-weight: bold; display: flex; justify-content: center; align-items: center;}
+
+        /* Блок 1.2: Відповідність лініями */
+        .match-container { position: relative; padding: 20px 0; }
+        .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; position: relative; z-index: 2; user-select: none; }
+        .match-col { display: flex; flex-direction: column; gap: 15px; }
+        .match-item { padding: 15px; border: 2px solid #ccc; border-radius: 5px; cursor: pointer; transition: 0.2s; background: white; text-align: center; position: relative; }
+        .match-item:hover:not(.correct-element) { border-color: var(--accent); }
+        .match-item.selected { border-color: var(--accent); background: #e8f4fd; box-shadow: 0 0 8px rgba(52, 152, 219, 0.4); }
+        svg.connections { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        /* Блок 2.1: Діаграма Венна */
+        .venn-wrapper { display: flex; justify-content: center; overflow-x: auto; padding-bottom: 20px; }
+        .venn-container { position: relative; width: 800px; height: 500px; margin: 20px 0 0; min-width: 800px; }
+        .circle { width: 500px; height: 500px; border-radius: 50%; position: absolute; top: 0; box-sizing: border-box; }
+        .circle.left { left: 0; background: rgba(52, 152, 219, 0.15); border: 2px solid var(--accent); }
+        .circle.right { right: 0; background: rgba(46, 204, 113, 0.15); border: 2px solid var(--success); }
+        .venn-title { position: absolute; top: 25px; font-size: 1.2rem; font-weight: bold; color: #333; z-index: 10; margin: 0; transform: translateX(-50%); text-align: center; }
+        .venn-title.left { left: 250px; }
+        .venn-title.right { left: 550px; }
+        .venn-zone { position: absolute; border: 2px dashed #999; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; padding: 10px; align-items: center; justify-content: flex-start; z-index: 5; background: rgba(255,255,255,0.7); width: 170px; min-height: 80px; height: fit-content; transform: translateX(-50%); transition: all 0.3s ease; box-sizing: border-box; }
+        #venn-left { top: 120px; left: 160px; }
+        #venn-right { top: 120px; left: 640px; }
+        #venn-both { top: 120px; left: 400px; background: rgba(255,255,255,0.85); border-color: #777; }
+        #block2 .draggable { width: 150px; font-size: 0.8rem; padding: 5px; margin: 2px; border-width: 1px; white-space: normal; word-wrap: break-word; line-height: 1.2; box-sizing: border-box; }
+
+        /* Блок 2.2 і Спільне для схем-колонок */
+        .scheme-container { display: flex; justify-content: space-between; gap: 15px; margin-top: 20px; }
+        .scheme-col { flex: 1; background: #fff; border: 2px solid var(--primary); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; }
+        .scheme-col h4.sync-height { min-height: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0 0 15px 0; background: var(--primary); color: white; padding: 10px; border-radius: 4px; line-height: 1.2; text-align: center; }
+        .checkbox-list { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+        .checkbox-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px; border-radius: 4px; font-size: 0.9rem; border: 1px solid transparent; cursor: pointer; }
+        .checkbox-item:hover { background: #f1f1f1; }
+        .checkbox-item input { margin-top: 3px; cursor: pointer; }
+
+        /* Блок 3.1: Стрічка часу (2 Рядки змійкою) */
+        .timeline-wrapper { display: flex; flex-direction: column; align-items: center; margin-top: 20px; gap: 15px; }
+        .timeline-row { display: flex; gap: 5px; align-items: stretch; justify-content: center; width: 100%; }
+        .timeline-turn { display: flex; justify-content: flex-end; width: 100%; padding-right: 15%; margin: -10px 0; }
+        .turn-down { font-size: 32px; transform: rotate(90deg); color: var(--primary); font-weight: bold; }
+        
+        /* Флешкартки (Динамічна висота) */
+        .flashcards-wrapper { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 25px; }
+        .flashcard { width: 220px; height: auto; min-height: 120px; background: white; border: 2px solid var(--primary); border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; padding-bottom: 45px; transition: height 0.3s ease; }
+        .flashcard.draggable { cursor: grab; }
+        
+        /* ЗМІНА: flex-grow: 1 центрує заголовок у флешкартці по вертикалі */
+        .flashcard-title { font-size: 1.2rem; font-weight: bold; text-align: center; padding: 15px 10px; color: var(--primary); display: flex; align-items: center; justify-content: center; line-height: 1.2; flex-grow: 1; }
+        
+        /* Inline контент (Блок 2.2) */
+        .flashcard-content.inline { display: none; padding: 0 15px 15px; font-size: 0.95rem; border-top: 1px solid #eee; margin-top: 5px; padding-top: 15px; text-align: center; }
+        .flashcard-content.inline.show { display: block; animation: fadeIn 0.3s; }
+        
+        /* Modal контент (Блок 3.1) */
+        .flashcard-content.modal-data { display: none; }
+        
+        .expand-btn { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); padding: 5px 15px; background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        
+        /* Авто-висота для dropzone (Блок 3.1) */
+        #timeline-3 .dropzone { height: auto; min-height: 120px; padding: 10px; box-sizing: border-box; align-items: stretch; }
+        #timeline-3 .timeline-slot { display: flex; flex-direction: column; }
+
+        /* Модальне вікно (Попап) для карток 3.1 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.2s; }
+        .modal-content { background: white; padding: 25px; border-radius: 10px; max-width: 500px; width: 100%; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888; transition: 0.3s; line-height: 1; }
+        .modal-close:hover { color: var(--danger); }
+        #modal-title { margin-top: 0; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-bottom: 15px; margin-right: 20px;}
+        #modal-body { font-size: 1.05rem; line-height: 1.6; color: #333; }
+
+        /* Блок 4.1: Матриця (Таблиця з чекбоксами) */
+        .matrix-table-wrapper { overflow-x: auto; margin-top: 20px; }
+        .matrix-table { width: 100%; min-width: 800px; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .matrix-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; background: var(--primary); color: white; font-weight: bold; text-align: center; }
+        .matrix-header-cell { padding: 15px 10px; display: flex; align-items: center; justify-content: center; }
+        .matrix-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; border-bottom: 1px solid #eee; align-items: stretch; transition: 0.3s; }
+        .matrix-row:nth-child(even) { background: #f9f9f9; }
+        .matrix-row:hover { background: #f1f1f1; }
+        .matrix-text { padding: 15px; font-size: 0.95rem; display: flex; align-items: center; }
+        
+        .matrix-cell { display: flex; justify-content: center; align-items: center; padding: 15px; border-left: 1px solid #eee; transition: 0.3s; cursor: pointer; }
+        .matrix-cell input { transform: scale(1.3); cursor: pointer; margin: 0; pointer-events: none; } 
+        
+        .correct-cell { background-color: var(--success-bg) !important; box-shadow: inset 0 0 0 2px var(--success); }
+        .incorrect-cell { background-color: var(--danger-bg) !important; box-shadow: inset 0 0 0 2px var(--danger); }
+
+        /* Блок 5: Тести */
+        .quiz-question { margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+        .quiz-question strong { display: block; margin-bottom: 15px; font-size: 1.1rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .quiz-option { padding: 12px 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 5px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .quiz-option:hover:not(.disabled) { background: #e2e6ea; border-color: #dae0e5; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.8; }
+        .quiz-option.correct { background: var(--success-bg) !important; border-color: var(--success) !important; color: #1e8449; font-weight: bold; }
+        .quiz-option.incorrect { background: var(--danger-bg); border-color: var(--danger); color: #943126; }
+        .quiz-explanation { margin-top: 15px; padding: 15px; background: #e8f4fd; border-left: 5px solid var(--accent); border-radius: 4px; font-size: 0.95rem; color: #333; display: none; }
+        #quiz-score { text-align: center; font-size: 1.3rem; font-weight: bold; margin-top: 20px; color: var(--primary); }
+
+        footer { background: var(--primary); color: white; text-align: center; padding: 15px; font-size: 0.9rem; }
+
+        /* Мобільна Адаптація */
+        @media (max-width: 768px) {
+            #reset-btn { position: static; display: block; margin: 10px auto 0; width: 100%; max-width: 200px; }
+            #timeline-1 { flex-direction: column; gap: 10px; }
+            .timeline-row { flex-direction: column !important; gap: 10px; }
+            .timeline-turn { display: none; } 
+            .arrow { transform: rotate(90deg) !important; margin: 5px 0; }
+            .match-grid { grid-template-columns: 1fr; gap: 30px; }
+            .scheme-container { flex-direction: column; min-width: auto; }
+            .venn-wrapper { justify-content: flex-start; }
+            nav button { padding: 8px 10px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Основи правознавства</h1>
+        <h2>Виникнення держави і права</h2>
+        <button id="reset-btn" onclick="resetProgress()" title="Очистити всі відповіді">Почати заново</button>
+    </header>
+
+    <nav class="top-nav">
+        <button class="nav-btn" data-target="block1">Блок 1</button>
+        <button class="nav-btn" data-target="block2">Блок 2</button>
+        <button class="nav-btn" data-target="block3">Блок 3</button>
+        <button class="nav-btn" data-target="block4">Блок 4</button>
+        <button class="nav-btn" data-target="block5">Блок 5</button>
+    </nav>
+
+    <!-- МОДАЛЬНЕ ВІКНО ДЛЯ КАРТОК (Блок 3.1) -->
+    <div class="modal-overlay" id="flashcard-modal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✖</button>
+            <h3 id="modal-title"></h3>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <main>
+        <!-- БЛОК 1 -->
+        <section id="block1" class="block-page active">
+            <div class="task-container">
+                <h3>1.1. Що виникло раніше?</h3>
+                <p class="instruction">Перетягніть картки на стрічку часу у правильній хронологічній послідовності.</p>
+                <div id="source-cards-1" class="dropzone">
+                    <div class="draggable" draggable="true" id="c1-law">Право</div>
+                    <div class="draggable" draggable="true" id="c1-state">Держава</div>
+                    <div class="draggable" draggable="true" id="c1-society">Суспільство</div>
+                    <div class="draggable" draggable="true" id="c1-power">Влада</div>
+                    <div class="draggable" draggable="true" id="c1-rules">Соціальні норми</div>
+                </div>
+                <div id="timeline-1">
+                    <div class="timeline-slot"><div class="dropzone" id="t1-z1" data-correct="c1-society"></div></div>
+                    <div class="arrow">➔</div>
+                    <div class="timeline-slot"><div class="dropzone" id="t1-z2" data-correct="c1-rules"></div></div>
+                    <div class="arrow">➔</div>
+                    <div class="timeline-slot"><div class="dropzone" id="t1-z3" data-correct="c1-power"></div></div>
+                    <div class="arrow">➔</div>
+                    <div class="timeline-slot"><div class="dropzone" id="t1-z4" data-correct="c1-state"></div></div>
+                    <div class="arrow">➔</div>
+                    <div class="timeline-slot"><div class="dropzone" id="t1-z5" data-correct="c1-law"></div></div>
+                </div>
+                <button class="check-btn" onclick="checkTask1_1()">Перевірити</button>
+            </div>
+
+            <div class="task-container">
+                <h3>1.2. Встановіть відповідність</h3>
+                <p class="instruction">По черзі натисніть на термін та його визначення, щоб створити пару.</p>
+                <div class="match-container">
+                    <svg class="connections" id="lines-svg"></svg>
+                    <div class="match-grid" id="match-grid">
+                        <div class="match-col" id="terms-col">
+                            <div class="match-item term" data-id="t1">Влада</div>
+                            <div class="match-item term" data-id="t2">Суспільство</div>
+                            <div class="match-item term" data-id="t3">Держава</div>
+                            <div class="match-item term" data-id="t4">Соціальні норми</div>
+                            <div class="match-item term" data-id="t5">Право</div>
+                        </div>
+                        <div class="match-col" id="defs-col">
+                            <div class="match-item def" data-match="t2">Сукупність людей, об’єднаних системою відносин, зв’язків, норм та форм спільної діяльності.</div>
+                            <div class="match-item def" data-match="t4">Правила поведінки, що регулюють відносини між людьми та їхніми об’єднаннями в суспільстві.</div>
+                            <div class="match-item def" data-match="t5">Система загальнообов’язкових, формально визначених норм, установлених або санкціонованих державою та забезпечених її впливом.</div>
+                            <div class="match-item def" data-match="t1">Здатність і можливість одних осіб або груп впливати на поведінку інших та спрямовувати їхню діяльність.</div>
+                            <div class="match-item def" data-match="t3">Особлива організація політичної влади, що діє на певній території, має апарат управління і примусу та встановлює загальнообов’язкові правила.</div>
+                        </div>
+                    </div>
+                </div>
+                <button class="check-btn" onclick="checkTask1_2()">Перевірити</button>
+            </div>
+        </section>
+
+        <!-- БЛОК 2 -->
+        <section id="block2" class="block-page">
+            <div class="task-container">
+                <h3>2.1. Діаграма Венна</h3>
+                <p class="instruction">Розподіліть характеристики: що стосується лише суспільства, лише держави, та що є спільним.</p>
+                <div id="source-cards-2" class="dropzone">
+                    <!-- Society -->
+                    <div class="draggable" draggable="true" id="c2-1" data-target="society">Охоплення всіх сфер</div>
+                    <div class="draggable" draggable="true" id="c2-2" data-target="society">Усі суспільні відносини</div>
+                    <div class="draggable" draggable="true" id="c2-3" data-target="society">Необов'язковість управління</div>
+                    <div class="draggable" draggable="true" id="c2-4" data-target="society">Природний шлях виникнення</div>
+                    <div class="draggable" draggable="true" id="c2-5" data-target="society">Кровноспоріднені зв’язки</div>
+                    <!-- State -->
+                    <div class="draggable" draggable="true" id="c2-6" data-target="state">Суверенітет</div>
+                    <div class="draggable" draggable="true" id="c2-7" data-target="state">Податкова система</div>
+                    <div class="draggable" draggable="true" id="c2-8" data-target="state">Апарат публічної влади</div>
+                    <div class="draggable" draggable="true" id="c2-9" data-target="state">Апарат примусу</div>
+                    <div class="draggable" draggable="true" id="c2-10" data-target="state">Правові норми</div>
+                    <!-- Both -->
+                    <div class="draggable" draggable="true" id="c2-11" data-target="both">Наявність влади</div>
+                    <div class="draggable" draggable="true" id="c2-12" data-target="both">Соціальні норми</div>
+                    <div class="draggable" draggable="true" id="c2-13" data-target="both">Правила поведінки</div>
+                    <div class="draggable" draggable="true" id="c2-14" data-target="both">Територія</div>
+                    <div class="draggable" draggable="true" id="c2-15" data-target="both">Об’єднує людей</div>
+                    <div class="draggable" draggable="true" id="c2-16" data-target="both">Внутрішня структура</div>
+                </div>
+                
+                <div class="venn-wrapper">
+                    <div class="venn-container">
+                        <div class="circle left"></div>
+                        <div class="circle right"></div>
+                        
+                        <h4 class="venn-title left">Суспільство</h4>
+                        <h4 class="venn-title right">Держава</h4>
+
+                        <div class="venn-zone dropzone" id="venn-left" data-zone="society"></div>
+                        <div class="venn-zone dropzone" id="venn-both" data-zone="both"></div>
+                        <div class="venn-zone dropzone" id="venn-right" data-zone="state"></div>
+                    </div>
+                </div>
+                <button class="check-btn" onclick="checkTask2_1()">Перевірити</button>
+            </div>
+
+            <!-- ЗАВДАННЯ 2.2 -->
+            <div class="task-container">
+                <h3>2.2. Характеристики соціальних і правових норм</h3>
+                <p class="instruction">Прочитайте список у кожному блоці. Поставте прапорець біля тих характеристик, які стосуються вказаної групи норм.</p>
+                <div class="scheme-container" id="scheme-2-2"></div>
+                <button class="check-btn" onclick="checkTask2_2()">Перевірити</button>
+
+                <div class="flashcards-wrapper">
+                    <div class="flashcard">
+                        <div class="flashcard-title">Соціальні норми</div>
+                        <div class="flashcard-content inline">Правила поведінки, що регулюють відносини між людьми в суспільстві. Основні види: моральні, звичаєві, релігійні, корпоративні, правові.</div>
+                        <button class="expand-btn" onclick="toggleFlashcard(this)">Розгорнути</button>
+                    </div>
+                    <div class="flashcard">
+                        <div class="flashcard-title">Мононорми</div>
+                        <div class="flashcard-content inline">Єдині, неподільні правила поведінки (звичаї, традиції, табу), що існували в первісному суспільстві до виникнення держави і права.</div>
+                        <button class="expand-btn" onclick="toggleFlashcard(this)">Розгорнути</button>
+                    </div>
+                    <div class="flashcard">
+                        <div class="flashcard-title">Правові норми</div>
+                        <div class="flashcard-content inline">Загальнообов’язкові, формально визначені правила поведінки, установлені або санкціоновані державою та забезпечені її впливом.</div>
+                        <button class="expand-btn" onclick="toggleFlashcard(this)">Розгорнути</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- БЛОК 3 -->
+        <section id="block3" class="block-page">
+            <div class="task-container">
+                <h3>3.1. Еволюція суспільства</h3>
+                <p class="instruction">Розташуйте етапи розвитку суспільства на стрічці часу. Ви можете розгортати картки для перегляду деталей у будь-який момент.</p>
+                <div id="source-cards-3" class="dropzone" style="min-height: 150px;">
+                    <div class="draggable flashcard" draggable="true" id="card-herd">
+                        <div class="flashcard-title">Первісне стадо</div>
+                        <div class="flashcard-content modal-data"><strong>Часові межі:</strong> близько 2 млн – 40 тис. років тому<br><br><strong>Період:</strong> ранній та середній палеоліт<br><br><strong>Характеристика:</strong> невелике нестійке об’єднання давніх людей, засноване на спільному добуванні їжі, захисті та виживанні.<br><br><strong>Основна риса:</strong> привласнювальне господарство (збиральництво, полювання).<br><br><strong>Соціальний зв'язок:</strong> нестабільні, кочуючі біологічні групи.<br><br><strong>Регулятор:</strong> інстинкти, сила вожака, перші найпростіші табу.<br><br><strong>Історичні приклади:</strong> найдавніші групи мисливців і збирачів.</div>
+                        <button class="expand-btn" onclick="openModal(this)">Детальніше</button>
+                    </div>
+                    <div class="draggable flashcard" draggable="true" id="card-clan">
+                        <div class="flashcard-title">Родова община</div>
+                        <div class="flashcard-content modal-data"><strong>Часові межі:</strong> близько 40 тис. – X тис. до н.е.<br><br><strong>Період:</strong> пізній палеоліт — неоліт<br><br><strong>Характеристика:</strong> спільнота людей, пов’язаних уявленням про спільне походження, колективною працею та спільним користуванням майном.<br><br><strong>Основна риса:</strong> колективна праця, спільна власність на все.<br><br><strong>Соціальний зв'язок:</strong> кровна спорідненість, матріархат, поява племен.<br><br><strong>Регулятор:</strong> мононорми, влада старійшин.<br><br><strong>Історичні приклади:</strong> родові колективи мисливців і збирачів; ранні землеробські общини.</div>
+                        <button class="expand-btn" onclick="openModal(this)">Детальніше</button>
+                    </div>
+                    <div class="draggable flashcard" draggable="true" id="card-tribe">
+                        <div class="flashcard-title">Плем'я</div>
+                        <div class="flashcard-content modal-data"><strong>Часові межі:</strong> близько X тис. — VIII тис. до н.е.<br><br><strong>Період:</strong> мезоліт — неоліт<br><br><strong>Характеристика:</strong> тип етнічної спільноти та соціальної організації, що складається з кількох родів, які мають спільну мову, територію, культуру, релігійні уявлення та єдину систему управління.<br><br><strong>Основна риса:</strong> об'єднання родичів для ефективнішого захисту, полювання та обміну шлюбними партнерами поза межами одного роду.<br><br><strong>Соціальний зв'язок:</strong> кровна спорідненість, тотемізм, зародження патріархату.<br><br><strong>Регулятор:</strong> мононорми, влада старійшин та племінних зборів, авторитет військових лідерів.<br><br><strong>Історичні приклади:</strong> союзи первісних мисливців Америки та Австралії; ранні кочові та осілі племена неоліту на Близькому Сході.</div>
+                        <button class="expand-btn" onclick="openModal(this)">Детальніше</button>
+                    </div>
+                    <div class="draggable flashcard" draggable="true" id="card-neighbor">
+                        <div class="flashcard-title">Сусідська община</div>
+                        <div class="flashcard-content modal-data"><strong>Часові межі:</strong> VI – IV тис. до н.е.<br><br><strong>Період:</strong> енеоліт — доба бронзи та раннього заліза<br><br><strong>Характеристика:</strong> спільнота, у якій головним зв’язком стає не спорідненість, а проживання на спільній території та господарська взаємодія.<br><br><strong>Основна риса:</strong> земля спільна, але знаряддя, праця та врожай — приватні.<br><br><strong>Соціальний зв'язок:</strong> замість кровної спорідненості — спільна територія.<br><br><strong>Регулятор:</strong> мононорми, влада старійшин.<br><br><strong>Історичні приклади:</strong> землеробські поселення Передньої Азії; територіальні общини давніх землеробів (Трипільська культура та ін.).</div>
+                        <button class="expand-btn" onclick="openModal(this)">Детальніше</button>
+                    </div>
+                    <div class="draggable flashcard" draggable="true" id="card-chief">
+                        <div class="flashcard-title">Вождівство</div>
+                        <div class="flashcard-content modal-data"><strong>Часові межі:</strong> IV – III тис. до н.е.<br><br><strong>Період:</strong> залізний вік (у більшості регіонів)<br><br><strong>Характеристика:</strong> складне ієрархічне об’єднання кількох общин або поселень під владою вождя, влада якого набуває постійного характеру.<br><br><strong>Основна риса:</strong> об'єднання племен у союзи для війн та великих робіт.<br><br><strong>Соціальний зв'язок:</strong> поява племінної знаті, вождів та професійних воїнів.<br><br><strong>Регулятор:</strong> влада вождя стає сакральною, право сили трансформується.<br><br><strong>Історичні приклади:</strong> ранні полінезійські вождівства; вождівства доколумбової Північної Америки; ранні протодержавні об’єднання.</div>
+                        <button class="expand-btn" onclick="openModal(this)">Детальніше</button>
+                    </div>
+                    <div class="draggable flashcard" draggable="true" id="card-state-evo">
+                        <div class="flashcard-title">Держава</div>
+                        <div class="flashcard-content modal-data"><strong>Часові межі:</strong> кінець IV – почат. I тис. до н.е.<br><br><strong>Період:</strong> залізний вік<br><br><strong>Характеристика:</strong> територіальна організація публічної влади зі спеціальним апаратом управління, правовими нормами, податками та можливістю державного примусу.<br><br><strong>Основна риса:</strong> поява публічної влади, відокремленої від суспільства, та поділ населення за територіальною ознакою.<br><br><strong>Соціальний зв'язок:</strong> політико-правові відносини (громадянство/підданство), чітке класове розшарування.<br><br><strong>Регулятор:</strong> звичаєве право замінюється писаними законами держави, забезпечується державним примусом.<br><br><strong>Історичні приклади:</strong> міста-держави Шумеру; Давній Єгипет; ранні держави Месопотамії.</div>
+                        <button class="expand-btn" onclick="openModal(this)">Детальніше</button>
+                    </div>
+                </div>
+
+                <div class="timeline-wrapper" id="timeline-3">
+                    <!-- Рядок 1 -->
+                    <div class="timeline-row">
+                        <div class="timeline-slot"><div class="dropzone" id="t3-z1" data-correct="card-herd"></div></div>
+                        <div class="arrow">➔</div>
+                        <div class="timeline-slot"><div class="dropzone" id="t3-z2" data-correct="card-clan"></div></div>
+                        <div class="arrow">➔</div>
+                        <div class="timeline-slot"><div class="dropzone" id="t3-z3" data-correct="card-tribe"></div></div>
+                    </div>
+                    <!-- Стрілка повороту (вниз) -->
+                    <div class="timeline-turn">
+                        <div class="arrow turn-down">➔</div>
+                    </div>
+                    <!-- Рядок 2 -->
+                    <div class="timeline-row" style="flex-direction: row-reverse;">
+                        <div class="timeline-slot"><div class="dropzone" id="t3-z4" data-correct="card-neighbor"></div></div>
+                        <div class="arrow" style="transform: scaleX(-1);">➔</div>
+                        <div class="timeline-slot"><div class="dropzone" id="t3-z5" data-correct="card-chief"></div></div>
+                        <div class="arrow" style="transform: scaleX(-1);">➔</div>
+                        <div class="timeline-slot"><div class="dropzone" id="t3-z6" data-correct="card-state-evo"></div></div>
+                    </div>
+                </div>
+                <button class="check-btn" onclick="checkTask3_1()">Перевірити</button>
+            </div>
+        </section>
+
+        <!-- БЛОК 4 -->
+        <section id="block4" class="block-page">
+            <div class="task-container">
+                <h3>4.1. Чинники виникнення держави і права</h3>
+                <p class="instruction">Віднесіть кожен чинник до однієї або кількох груп, поставивши прапорці навпроти відповідних варіантів.</p>
+                <div class="matrix-table-wrapper">
+                    <div class="matrix-table" id="matrix-4"></div>
+                </div>
+                <button class="check-btn" onclick="checkTask4_1()">Перевірити</button>
+            </div>
+        </section>
+
+        <!-- БЛОК 5 -->
+        <section id="block5" class="block-page">
+            <div class="task-container">
+                <h3>5.1. Тестові завдання</h3>
+                <p class="instruction">Оберіть одну правильну відповідь. Перевірка та пояснення з'являться автоматично після вашого вибору.</p>
+                <div id="quiz-container"></div>
+                <div id="quiz-score">Бали: 0 / 0</div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <button class="nav-btn" data-target="block1">Блок 1</button>
+        <button class="nav-btn" data-target="block2">Блок 2</button>
+        <button class="nav-btn" data-target="block3">Блок 3</button>
+        <button class="nav-btn" data-target="block4">Блок 4</button>
+        <button class="nav-btn" data-target="block5">Блок 5</button>
+    </nav>
+
+    <footer>
+        Інтерактивне завдання створено Ольгою Герінбург
+    </footer>
+
+    <script>
+        // --- ДОПОМІЖНА ФУНКЦІЯ: ПЕРЕМІШУВАННЯ КАРТОК ---
+        function shuffleCards(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const cards = Array.from(container.querySelectorAll('.draggable'));
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            cards.forEach(card => container.appendChild(card));
+        }
+
+        // --- СТАН (Збереження прогресу) ---
+        let appState = JSON.parse(localStorage.getItem('lawTaskStateVFinal4')) || {
+            activeTab: 'block1',
+            t1_1: { checked: false, positions: {} },
+            t1_2: { checked: false, connections: [] },
+            t2_1: { checked: false, positions: {} },
+            t2_2: { checked: false, boxes: {} },
+            t3_1: { checked: false, positions: {} },
+            t4_1: { checked: false, boxes: {} },
+            t5: { answers: {} }
+        };
+
+        function saveState() {
+            appState.t1_1.positions = getPositions('block1');
+            appState.t2_1.positions = getPositions('block2 .dropzone:not(#scheme-2-2)'); 
+            appState.t3_1.positions = getPositions('block3');
+            
+            document.querySelectorAll('#matrix-4 input[type="checkbox"]').forEach((cb) => {
+                appState.t4_1.boxes[cb.id] = cb.checked;
+            });
+            document.querySelectorAll('#scheme-2-2 input[type="checkbox"]').forEach((cb) => {
+                appState.t2_2.boxes[cb.id] = cb.checked;
+            });
+            
+            appState.t1_2.connections = connections.map(c => ({
+                termId: c.termId, defId: c.defId, locked: c.locked
+            }));
+
+            localStorage.setItem('lawTaskStateVFinal4', JSON.stringify(appState));
+        }
+
+        function getPositions(selector) {
+            let pos = {};
+            document.querySelectorAll(`${selector.includes('.dropzone') ? '#block2' : '#' + selector} .draggable`).forEach(el => {
+                pos[el.id] = el.parentElement.id;
+            });
+            return pos;
+        }
+
+        function resetProgress() {
+            if(confirm("Ви впевнені, що хочете очистити всі відповіді та почати заново?")) {
+                localStorage.removeItem('lawTaskStateVFinal4');
+                location.reload();
+            }
+        }
+
+        // --- Навігація ---
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-target');
+                document.querySelectorAll('.nav-btn').forEach(b => {
+                    b.classList.toggle('active', b.getAttribute('data-target') === target);
+                });
+                document.querySelectorAll('.block-page').forEach(p => p.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                appState.activeTab = target;
+                saveState();
+                
+                if(target === 'block1') setTimeout(drawLines, 100);
+            });
+        });
+
+        // --- Drag and Drop ---
+        let draggedItem = null;
+        document.querySelectorAll('.draggable').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedItem = this;
+                setTimeout(() => this.style.opacity = '0.4', 0);
+            });
+            item.addEventListener('dragend', function() {
+                this.style.opacity = '1';
+                draggedItem = null;
+                saveState();
+            });
+        });
+
+        document.querySelectorAll('.dropzone').forEach(zone => {
+            zone.addEventListener('dragover', e => {
+                e.preventDefault();
+                // Забороняємо множинне розміщення в одній клітинці на стрічці часу
+                const isTimeline = zone.closest('#timeline-1, #timeline-3');
+                const hasCard = zone.querySelector('.draggable');
+                if (isTimeline && hasCard && hasCard !== draggedItem) return; 
+                
+                zone.classList.add('dragover');
+            });
+            zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+            zone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (draggedItem) {
+                    const isTimeline = this.closest('#timeline-1, #timeline-3');
+                    const hasCard = this.querySelector('.draggable');
+                    if (isTimeline && hasCard && hasCard !== draggedItem) return; 
+                    
+                    draggedItem.classList.remove('correct-element', 'incorrect-element');
+                    this.appendChild(draggedItem);
+                }
+            });
+        });
+
+        // --- Флешкартки (Вниз) для 2.2 ---
+        function toggleFlashcard(btn) {
+            const content = btn.previousElementSibling;
+            content.classList.toggle('show');
+            btn.innerText = content.classList.contains('show') ? 'Згорнути' : 'Розгорнути';
+        }
+
+        // --- Модальне вікно (Попап) для 3.1 ---
+        function openModal(btn) {
+            const card = btn.closest('.flashcard');
+            const title = card.querySelector('.flashcard-title').innerText;
+            const contentHTML = card.querySelector('.flashcard-content').innerHTML;
+
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-body').innerHTML = contentHTML;
+            document.getElementById('flashcard-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('flashcard-modal').classList.remove('active');
+        }
+
+        // --- Перевірки ---
+        function checkTask1_1(auto = false) {
+            document.querySelectorAll('#timeline-1 .dropzone').forEach(zone => {
+                const item = zone.querySelector('.draggable');
+                if (item) {
+                    if (item.id === zone.getAttribute('data-correct')) {
+                        item.classList.add('correct-element'); item.classList.remove('incorrect-element');
+                    } else {
+                        item.classList.add('incorrect-element'); item.classList.remove('correct-element');
+                    }
+                }
+            });
+            if(!auto) { appState.t1_1.checked = true; saveState(); }
+        }
+
+        // Блок 1.2 Малювання ліній
+        let activeTerm = null;
+        let connections = []; 
+        document.querySelectorAll('.match-item.term').forEach(term => {
+            term.addEventListener('click', function() {
+                if (this.classList.contains('correct-element')) return; 
+                document.querySelectorAll('.match-item.term:not(.correct-element)').forEach(t => t.classList.remove('selected', 'incorrect-element'));
+                this.classList.add('selected');
+                activeTerm = this;
+            });
+        });
+        document.querySelectorAll('.match-item.def').forEach(def => {
+            def.addEventListener('click', function() {
+                if (this.classList.contains('correct-element')) return; 
+                if (!activeTerm) return;
+                document.querySelectorAll('.match-item:not(.correct-element)').forEach(el => el.classList.remove('incorrect-element'));
+                
+                const activeId = activeTerm.getAttribute('data-id');
+                const defMatch = def.getAttribute('data-match');
+                
+                connections = connections.filter(c => c.locked || (c.termId !== activeId && c.defId !== defMatch));
+                connections.push({ termId: activeId, defId: defMatch, termEl: activeTerm, defEl: def, locked: false });
+                
+                activeTerm.classList.remove('selected');
+                activeTerm = null;
+                drawLines();
+                saveState();
+            });
+        });
+
+        function drawLines() {
+            const svg = document.getElementById('lines-svg');
+            svg.innerHTML = '';
+            const containerBox = document.getElementById('match-grid').getBoundingClientRect();
+            const isMobile = window.innerWidth <= 768;
+
+            connections.forEach(conn => {
+                const termBox = conn.termEl.getBoundingClientRect();
+                const defBox = conn.defEl.getBoundingClientRect();
+                let x1, y1, x2, y2;
+                if (isMobile) {
+                    x1 = termBox.left + termBox.width / 2 - containerBox.left; y1 = termBox.bottom - containerBox.top;
+                    x2 = defBox.left + defBox.width / 2 - containerBox.left; y2 = defBox.top - containerBox.top;
+                } else {
+                    x1 = termBox.right - containerBox.left; y1 = termBox.top + termBox.height / 2 - containerBox.top;
+                    x2 = defBox.left - containerBox.left; y2 = defBox.top + defBox.height / 2 - containerBox.top;
+                }
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1); line.setAttribute('y1', y1); line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+                line.setAttribute('stroke-width', '3');
+                if (conn.locked) line.setAttribute('stroke', 'var(--success)');
+                else if (conn.termEl.classList.contains('incorrect-element')) line.setAttribute('stroke', 'var(--danger)');
+                else line.setAttribute('stroke', '#adb5bd'); 
+                svg.appendChild(line);
+            });
+        }
+        window.addEventListener('resize', () => { if(document.getElementById('block1').classList.contains('active')) drawLines(); });
+
+        function checkTask1_2(auto = false) {
+            connections.forEach(conn => {
+                if (conn.termId === conn.defId) {
+                    conn.locked = true;
+                    conn.termEl.classList.add('correct-element'); conn.termEl.classList.remove('incorrect-element');
+                    conn.defEl.classList.add('correct-element'); conn.defEl.classList.remove('incorrect-element');
+                } else {
+                    conn.termEl.classList.add('incorrect-element'); conn.defEl.classList.add('incorrect-element');
+                }
+            });
+            drawLines();
+            if(!auto) { appState.t1_2.checked = true; saveState(); }
+        }
+
+        function checkTask2_1(auto = false) {
+            document.querySelectorAll('.venn-zone').forEach(zone => {
+                const requiredZone = zone.getAttribute('data-zone');
+                zone.querySelectorAll('.draggable').forEach(item => {
+                    if (item.getAttribute('data-target') === requiredZone) {
+                        item.classList.add('correct-element'); item.classList.remove('incorrect-element');
+                    } else {
+                        item.classList.add('incorrect-element'); item.classList.remove('correct-element');
+                    }
+                });
+            });
+            if(!auto) { appState.t2_1.checked = true; saveState(); }
+        }
+
+        // --- Блок 2.2 ---
+        const block2_2_data = [
+            {
+                id: 'soc',
+                title: 'СОЦІАЛЬНІ НОРМИ',
+                items: [
+                    { id: 'c22_s1', text: "Виникають у суспільстві", correct: true },
+                    { id: 'c22_l1', text: "Установлюються або санкціонуються державою", correct: false },
+                    { id: 'c22_s3', text: "Підтримуються громадською думкою", correct: true },
+                    { id: 'c22_l4', text: "Закріплюються в офіційних джерелах", correct: false },
+                    { id: 'c22_s6', text: "Бувають моральними, релігійними, звичаєвими", correct: true },
+                    { id: 'c22_l6', text: "Забезпечуються державою", correct: false },
+                    { id: 'c22_s7', text: "Формуються поступово через повторення", correct: true }
+                ]
+            },
+            {
+                id: 'law',
+                title: 'ПРАВОВІ НОРМИ<br><span style="font-size: 0.8rem; font-weight: normal; text-transform: none;">особливий вид соціальних норм</span>',
+                items: [
+                    { id: 'c22_l2', text: "Мають формально визначений характер", correct: true },
+                    { id: 'c22_s2', text: "Можуть існувати в усній формі", correct: false },
+                    { id: 'c22_l5', text: "Є загальнообов’язковими", correct: true },
+                    { id: 'c22_s4', text: "Порушення передбачає громадський осуд", correct: false },
+                    { id: 'c22_l8', text: "Передбачають юридичну відповідальність", correct: true },
+                    { id: 'c22_s9', text: "Діють у певних спільнотах", correct: false },
+                    { id: 'c22_l9', text: "Утворюють систему правових норм", correct: true }
+                ]
+            }
+        ];
+        
+        const container2_2 = document.getElementById('scheme-2-2');
+        block2_2_data.forEach(col => {
+            let colHTML = `<div class="scheme-col"><h4 class="sync-height">${col.title}</h4><div class="checkbox-list">`;
+            col.items.forEach(item => {
+                colHTML += `<label class="checkbox-item"><input type="checkbox" id="${item.id}" data-correct="${item.correct}" onchange="saveState()"> ${item.text}</label>`;
+            });
+            colHTML += `</div></div>`;
+            container2_2.innerHTML += colHTML;
+        });
+
+        function checkTask2_2(auto = false) {
+            document.querySelectorAll('#scheme-2-2 .checkbox-item').forEach(item => {
+                const checkbox = item.querySelector('input');
+                item.classList.remove('correct-element', 'incorrect-element');
+                
+                if (checkbox.checked) {
+                    if (checkbox.getAttribute('data-correct') === 'true') {
+                        item.classList.add('correct-element');
+                    } else {
+                        item.classList.add('incorrect-element');
+                    }
+                }
+            });
+            if(!auto) { appState.t2_2.checked = true; saveState(); }
+        }
+
+        function checkTask3_1(auto = false) {
+            document.querySelectorAll('#timeline-3 .dropzone').forEach(zone => {
+                const item = zone.querySelector('.draggable');
+                if (item) {
+                    if (item.id === zone.getAttribute('data-correct')) {
+                        item.classList.add('correct-element'); item.classList.remove('incorrect-element');
+                    } else {
+                        item.classList.add('incorrect-element'); item.classList.remove('correct-element');
+                    }
+                }
+            });
+            if(!auto) { appState.t3_1.checked = true; saveState(); }
+        }
+
+        // --- Блок 4.1 Матриця З ПІДТРИМКОЮ МУЛЬТИВИБОРУ ---
+        // Чинники ретельно перемішані вручну
+        const causes4_1 = [
+            { text: "Зростання чисельності населення", types: ["soc"] },
+            { text: "Виникнення виробничого типу господарства", types: ["eco"] },
+            { text: "Потреба в постійному управлінні складним суспільством", types: ["pol"] },
+            { text: "Формування приватної власності та майнової нерівності", types: ["eco", "soc"] },
+            { text: "Необхідність організації оборони та захисту території", types: ["pol"] },
+            { text: "Розвиток землеробства і скотарства", types: ["eco"] },
+            { text: "Майнове й соціальне розшарування населення", types: ["soc", "eco"] },
+            { text: "Загострення суперечностей і конфліктів між різними групами", types: ["soc", "pol"] },
+            { text: "Суспільний поділ праці та виокремлення ремесла", types: ["eco"] },
+            { text: "Виникнення патріархальної сім'ї", types: ["soc"] },
+            { text: "Потреба в організації великих спільних робіт і мобілізації ресурсів", types: ["pol", "eco"] },
+            { text: "Поява надлишкового продукту", types: ["eco"] },
+            { text: "Формування груп із різними інтересами", types: ["soc", "pol"] },
+            { text: "Розвиток обміну й торгівлі", types: ["eco"] },
+            { text: "Необхідність підтримання суспільного порядку та врегулювання конфліктів", types: ["pol", "soc"] },
+            { text: "Послаблення родових зв’язків і перехід до територіальної організації населення", types: ["soc", "pol"] }
+        ];
+        
+        let matrixHTML = `
+            <div class="matrix-header">
+                <div class="matrix-header-cell">Чинники</div>
+                <div class="matrix-header-cell">Економічні</div>
+                <div class="matrix-header-cell">Соціальні</div>
+                <div class="matrix-header-cell">Політичні</div>
+            </div>`;
+            
+        causes4_1.forEach((cause, idx) => {
+            const correctData = cause.types.join(',');
+            matrixHTML += `
+            <div class="matrix-row" data-correct="${correctData}">
+                <div class="matrix-text">${idx + 1}. ${cause.text}</div>
+                <div class="matrix-cell" onclick="toggleCellCheckbox(this)"><input type="checkbox" id="cb4_${idx}_eco" value="eco"></div>
+                <div class="matrix-cell" onclick="toggleCellCheckbox(this)"><input type="checkbox" id="cb4_${idx}_soc" value="soc"></div>
+                <div class="matrix-cell" onclick="toggleCellCheckbox(this)"><input type="checkbox" id="cb4_${idx}_pol" value="pol"></div>
+            </div>`;
+        });
+        
+        // Дублюємо заголовок внизу таблиці для зручності
+        matrixHTML += `
+            <div class="matrix-header matrix-footer" style="border-top: 2px solid var(--primary);">
+                <div class="matrix-header-cell">Чинники</div>
+                <div class="matrix-header-cell">Економічні</div>
+                <div class="matrix-header-cell">Соціальні</div>
+                <div class="matrix-header-cell">Політичні</div>
+            </div>`;
+            
+        document.getElementById('matrix-4').innerHTML = matrixHTML;
+
+        function toggleCellCheckbox(cell) {
+            const cb = cell.querySelector('input');
+            cb.checked = !cb.checked;
+            saveState();
+        }
+
+        function checkTask4_1(auto = false) {
+            document.querySelectorAll('.matrix-row').forEach(row => {
+                if (row.classList.contains('matrix-header')) return;
+                
+                const correctTypes = row.getAttribute('data-correct').split(',');
+                
+                row.querySelectorAll('.matrix-cell').forEach(cell => {
+                    cell.classList.remove('correct-cell', 'incorrect-cell');
+                    const cb = cell.querySelector('input');
+                    
+                    if (cb.checked) {
+                        if (correctTypes.includes(cb.value.trim())) {
+                            cell.classList.add('correct-cell');
+                        } else {
+                            cell.classList.add('incorrect-cell');
+                        }
+                    }
+                });
+            });
+            if(!auto) { appState.t4_1.checked = true; saveState(); }
+        }
+
+        // --- Блок 5 Тести ---
+        const questions = [
+            { q: "Який вид соціальних норм не був властивий регулюванню суспільних відносин у первісному суспільстві?", options: ["Норми моралі", "Правові норми", "Звичаї і традиції", "Релігійні норми"], ans: 1, exp: "У первісному суспільстві ще не існувало права як системи формально визначених норм, установлених державою." },
+            { q: "Що називають мононормами?", options: ["Перші писані закони стародавніх держав", "Правила, що регулюють лише релігійні обряди", "Нерозчленовані правила поведінки первісного суспільства", "Норми, які встановлюють органи державної влади"], ans: 2, exp: "У мононормах ще не були відокремлені моральні, релігійні, звичаєві та правові приписи." },
+            { q: "Яка ознака найбільш чітко відрізняє правову норму від інших соціальних норм?", options: ["Регулювання поведінки людей", "Виникнення в суспільстві", "Вплив на суспільні відносини", "Установлення або санкціонування державою"], ans: 3, exp: "Усі соціальні норми регулюють поведінку, але правові норми мають особливий зв’язок із державою." },
+            { q: "Який із наведених чинників насамперед належить до економічних передумов виникнення держави?", options: ["Зростання чисельності населення", "Поява надлишкового продукту", "Виникнення патріархальної сім'ї", "Потреба в організації великих спільних робіт і мобілізації ресурсів"], ans: 1, exp: "Надлишковий продукт виник унаслідок розвитку господарства і став однією з передумов майнової диференціації суспільства." },
+            { q: "До яких чинників виникнення держави найточніше віднести майнове розшарування суспільства?", options: ["Лише політичних", "Лише соціальних", "Економічних і соціальних", "Політичних і економічних"], ans: 2, exp: "Майнова нерівність має економічну основу, але водночас змінює соціальну структуру суспільства." },
+            { q: "Яка зміна найбільш безпосередньо сприяла переходу від родової до територіальної організації суспільства?", options: ["Ускладнення господарських зв’язків", "Зростання ролі кровного споріднення", "Послаблення родових зв’язків", "Збереження спільної власності на все майно"], ans: 2, exp: "У сусідській общині основою об’єднання поступово стає спільна територія, а не лише кровна спорідненість." },
+            { q: "Яка характеристика найбільше відповідає поняттю «чифдом»?", options: ["Повна відсутність постійного керівництва", "Розвинена система поділу влади", "Ієрархічне об’єднання общин під владою вождя", "Об’єднання лише членів одного роду"], ans: 2, exp: "Чифдом (Вождівство, Військова демократія) є складним ієрархічним об’єднанням кількох общин або поселень під владою вождя, влада якого набуває постійного характеру." },
+            { q: "Яка з наведених ознак властива державі, але не суспільству загалом?", options: ["Наявність влади", "Існування соціальних зв’язків та правил поведінки", "Суверенітет", "Наявність території"], ans: 2, exp: "Суверенітет є специфічною ознакою держави й означає верховенство державної влади всередині країни та її незалежність назовні." },
+            { q: "Який чинник безпосередньо пов’язаний із формуванням організованої публічної влади?", options: ["Розвиток обміну й торгівлі", "Майнове розшарування населення", "Потреба в організації оборони", "Перехід до виробничого господарства"], ans: 2, exp: "Організація оборони вимагає постійного керівництва, координації та мобілізації ресурсів, тобто політичної організації." },
+            { q: "Позначте поняття, яке визначається як історично сформована сукупність індивідів, форма колективного співжиття людей та система різноманітних зв'язків і відносин між людьми.", options: ["Держава", "Суспільство", "Населення", "Громада"], ans: 1, exp: "Суспільство — це історично сформована сукупність людей, об’єднаних різноманітними соціальними зв’язками та відносинами. Воно є формою спільного життя людей і охоплює різні сфери їхньої взаємодії." }
+        ];
+
+        let quizScore = 0; let answeredQuestions = 0;
+        const quizContainer = document.getElementById('quiz-container');
+        const scoreDisplay = document.getElementById('quiz-score');
+
+        questions.forEach((q, qIndex) => {
+            let html = `<div class="quiz-question" id="qblock-${qIndex}"><strong>${qIndex + 1}. ${q.q}</strong><div class="quiz-options">`;
+            q.options.forEach((opt, i) => {
+                html += `<label class="quiz-option" id="opt-${qIndex}-${i}">
+                        <input type="radio" name="q${qIndex}" value="${i}" onchange="handleQuizAnswer(${qIndex}, ${i}, ${q.ans})"> ${opt}</label>`;
+            });
+            html += `</div><div class="quiz-explanation" id="exp-${qIndex}"><strong>Правильна відповідь:</strong> ${q.exp}</div></div>`;
+            quizContainer.innerHTML += html;
+        });
+
+        function handleQuizAnswer(qIndex, selectedValue, correctValue, isRestore = false) {
+            const questionBlock = document.getElementById(`qblock-${qIndex}`);
+            if (questionBlock.classList.contains('answered')) return;
+            questionBlock.classList.add('answered');
+
+            questionBlock.querySelectorAll('input').forEach(input => {
+                input.disabled = true; input.parentElement.classList.add('disabled');
+            });
+
+            const selectedLabel = document.getElementById(`opt-${qIndex}-${selectedValue}`);
+            const correctLabel = document.getElementById(`opt-${qIndex}-${correctValue}`);
+            document.querySelector(`input[name="q${qIndex}"][value="${selectedValue}"]`).checked = true;
+
+            if (selectedValue === correctValue) { selectedLabel.classList.add('correct'); quizScore++; }
+            else { selectedLabel.classList.add('incorrect'); correctLabel.classList.add('correct'); }
+            
+            document.getElementById(`exp-${qIndex}`).style.display = 'block';
+            answeredQuestions++; updateScore();
+            
+            if(!isRestore) { appState.t5.answers[qIndex] = selectedValue; saveState(); }
+        }
+
+        function updateScore() {
+            scoreDisplay.innerText = `Бали: ${quizScore} / ${questions.length}`;
+            if (answeredQuestions === questions.length) {
+                const percent = Math.round((quizScore / questions.length) * 100);
+                scoreDisplay.innerText += ` (${percent}%) - Тест завершено!`;
+                scoreDisplay.style.color = percent >= 80 ? 'var(--success)' : (percent >= 50 ? '#f39c12' : 'var(--danger)');
+            }
+        }
+
+        // --- ІНІЦІАЛІЗАЦІЯ ТА ВІДНОВЛЕННЯ СТАНУ ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Спочатку перемішуємо картки у стартових контейнерах
+            shuffleCards('source-cards-1');
+            shuffleCards('source-cards-3');
+
+            // 2. Відновлюємо активну вкладку
+            const activeTab = appState.activeTab || 'block1';
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-target') === activeTab);
+            });
+            document.querySelectorAll('.block-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(activeTab).classList.add('active');
+            
+            if(activeTab === 'block1') { setTimeout(drawLines, 100); }
+
+            // 3. Відновлюємо позиції елементів
+            const restorePositions = (posData) => {
+                if(!posData) return;
+                for (const [cardId, zoneId] of Object.entries(posData)) {
+                    const card = document.getElementById(cardId);
+                    const zone = document.getElementById(zoneId);
+                    if(card && zone) zone.appendChild(card);
+                }
+            };
+            restorePositions(appState.t1_1.positions);
+            restorePositions(appState.t2_1.positions);
+            restorePositions(appState.t3_1.positions);
+
+            if(appState.t4_1.boxes) {
+                for(const [id, isChecked] of Object.entries(appState.t4_1.boxes)) {
+                    const cb = document.getElementById(id); if(cb) cb.checked = isChecked;
+                }
+            }
+            if(appState.t2_2.boxes) {
+                for(const [id, isChecked] of Object.entries(appState.t2_2.boxes)) {
+                    const cb = document.getElementById(id); if(cb) cb.checked = isChecked;
+                }
+            }
+
+            if (appState.t1_2.connections && appState.t1_2.connections.length > 0) {
+                connections = appState.t1_2.connections.map(c => {
+                    const tEl = document.querySelector(`.match-item.term[data-id="${c.termId}"]`);
+                    const dEl = document.querySelector(`.match-item.def[data-match="${c.defId}"]`);
+                    if(c.locked) { tEl.classList.add('correct-element'); dEl.classList.add('correct-element'); }
+                    return { termId: c.termId, defId: c.defId, termEl: tEl, defEl: dEl, locked: c.locked };
+                });
+                setTimeout(drawLines, 100);
+            }
+
+            // 4. Відновлюємо статус перевірки
+            if(appState.t1_1.checked) checkTask1_1(true);
+            if(appState.t1_2.checked) checkTask1_2(true);
+            if(appState.t2_1.checked) checkTask2_1(true);
+            if(appState.t2_2.checked) checkTask2_2(true);
+            if(appState.t3_1.checked) checkTask3_1(true);
+            if(appState.t4_1.checked) checkTask4_1(true);
+
+            if(appState.t5.answers) {
+                for (const [qIndex, selectedValue] of Object.entries(appState.t5.answers)) {
+                    handleQuizAnswer(parseInt(qIndex), parseInt(selectedValue), questions[qIndex].ans, true);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
