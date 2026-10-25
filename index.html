@@ -48,8 +48,7 @@
         .check-btn:hover { background: var(--accent); }
 
         /* Drag & Drop */
-        .draggable { padding: 10px 15px; background: #fff; border: 2px solid var(--accent); border-radius: 5px; cursor: grab; display: inline-flex; justify-content: center; align-items: center; margin: 5px; user-select: none; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; z-index: 50; position: relative; }
-        .draggable:active { cursor: grabbing; transform: scale(0.95); }
+        .draggable { padding: 10px 15px; background: #fff; border: 2px solid var(--accent); border-radius: 5px; cursor: grab; display: inline-flex; justify-content: center; align-items: center; margin: 5px; user-select: none; touch-action: none; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.2s; z-index: 50; position: relative; }        .draggable:active { cursor: grabbing; transform: scale(0.95); }
         .dropzone { min-height: 60px; border: 2px dashed #bdc3c7; border-radius: 5px; padding: 10px; display: flex; gap: 10px; align-items: center; justify-content: center; background: #fdfdfd; flex-wrap: wrap; transition: 0.3s; }
         .dropzone.dragover { background: #e8f4fd; border-color: var(--accent); }
         .correct-element { border-color: var(--success) !important; background-color: var(--success-bg) !important; color: #1e8449; cursor: default !important; }
@@ -535,6 +534,126 @@
                 }
             });
         });
+
+        
+/* Сенсорне перетягування карток на мобільних пристроях */
+let touchDrag = null;
+
+document.querySelectorAll('.draggable').forEach(card => {
+    card.addEventListener('pointerdown', function (e) {
+        // Залишаємо кнопки всередині карток клікабельними
+        if (e.pointerType !== 'touch' || e.target.closest('button')) return;
+        if (e.button !== 0) return;
+
+        e.preventDefault();
+
+        const rect = card.getBoundingClientRect();
+
+        touchDrag = {
+            card,
+            parent: card.parentElement,
+            next: card.nextSibling,
+            offsetX: e.clientX - rect.left,
+            offsetY: e.clientY - rect.top,
+            width: rect.width,
+            height: rect.height,
+            startX: e.clientX,
+            startY: e.clientY,
+            moved: false,
+            style: {
+                position: card.style.position,
+                left: card.style.left,
+                top: card.style.top,
+                width: card.style.width,
+                height: card.style.height,
+                zIndex: card.style.zIndex,
+                pointerEvents: card.style.pointerEvents,
+                margin: card.style.margin,
+                opacity: card.style.opacity
+            }
+        };
+
+        card.style.position = 'fixed';
+        card.style.left = rect.left + 'px';
+        card.style.top = rect.top + 'px';
+        card.style.width = rect.width + 'px';
+        card.style.height = rect.height + 'px';
+        card.style.margin = '0';
+        card.style.zIndex = '9999';
+        card.style.pointerEvents = 'none';
+        card.style.opacity = '0.85';
+    }, { passive: false });
+});
+
+document.addEventListener('pointermove', function (e) {
+    if (!touchDrag) return;
+
+    e.preventDefault();
+
+    const d = touchDrag;
+
+    if (
+        !d.moved &&
+        Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 6
+    ) return;
+
+    d.moved = true;
+    d.card.style.left = (e.clientX - d.offsetX) + 'px';
+    d.card.style.top = (e.clientY - d.offsetY) + 'px';
+}, { passive: false });
+
+function finishTouchDrag(e) {
+    if (!touchDrag) return;
+
+    const d = touchDrag;
+    touchDrag = null;
+
+    const card = d.card;
+
+        if (d.moved) {
+            // Визначаємо зону під пальцем, не враховуючи саму картку
+            card.style.pointerEvents = 'none';
+            const element = document.elementFromPoint(e.clientX, e.clientY);
+            const zone = element?.closest('.dropzone');
+
+            // Відновлюємо початкові стилі картки
+            Object.assign(card.style, d.style);
+
+        if (zone) {
+            const isTimeline = zone.closest('#timeline-1, #timeline-3');
+            const existingCard = zone.querySelector('.draggable');
+
+            // У клітинці стрічки часу може бути лише одна картка
+            if (!isTimeline || !existingCard || existingCard === card) {
+                card.classList.remove(
+                    'correct-element',
+                    'incorrect-element'
+                );
+                zone.appendChild(card);
+            } else {
+                // Якщо клітинка зайнята, повертаємо картку назад
+                if (d.next && d.next.parentNode === d.parent) {
+                    d.parent.insertBefore(card, d.next);
+                } else {
+                    d.parent.appendChild(card);
+                }
+            }
+        } else {
+            // Якщо відпустили поза зоною, повертаємо картку
+            if (d.next && d.next.parentNode === d.parent) {
+                d.parent.insertBefore(card, d.next);
+            } else {
+                d.parent.appendChild(card);
+            }
+        }
+
+        saveState();
+    }
+}
+
+document.addEventListener('pointerup', finishTouchDrag);
+document.addEventListener('pointercancel', finishTouchDrag);
+
 
         // --- Флешкартки (Вниз) для 2.2 ---
         function toggleFlashcard(btn) {
